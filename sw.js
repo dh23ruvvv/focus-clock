@@ -1,17 +1,19 @@
 // Service Worker for Focus Clock PWA
-const CACHE_NAME = 'focus-clock-v1';
-const ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png'
-];
+const CACHE_NAME = 'focus-clock-v2';
 
-// Install: cache all assets
+// Install: cache core page
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then((cache) => {
+      // Use relative URLs that work on any host path
+      return cache.addAll([
+        './',
+        './index.html',
+        './manifest.json',
+        './icon-192.png',
+        './icon-512.png'
+      ]);
+    })
   );
   self.skipWaiting();
 });
