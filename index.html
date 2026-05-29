@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="description" content="Minimal focus clock - stay off your phone and study">
+  <title>Focus Clock</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: none;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    #clock {
+      color: #ffffff;
+      font-size: clamp(4rem, 18vw, 14rem);
+      font-weight: 200;
+      letter-spacing: 0.04em;
+      text-align: center;
+      line-height: 1;
+      opacity: 0;
+      animation: fadeIn 1s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    /* Subtle pulse on the colon to show it's alive */
+    .colon {
+      display: inline-block;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Wake lock indicator - tiny dot in corner */
+    #wake-indicator {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #333;
+      transition: background 0.3s ease;
+    }
+
+    #wake-indicator.active {
+      background: #2a5a2a;
+    }
+  </style>
+</head>
+<body>
+  <div id="clock"></div>
+  <div id="wake-indicator" title="Screen wake lock"></div>
+
+  <script>
+    const clockEl = document.getElementById('clock');
+    const wakeIndicator = document.getElementById('wake-indicator');
+    let wakeLock = null;
+
+    // ── Time Display ──────────────────────────────────
+    function updateClock() {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = now.getMinutes();
+
+      // Convert to 12-hour format
+      hours = hours % 12;
+      if (hours === 0) hours = 12;
+
+      const h = String(hours);
+      const m = String(minutes).padStart(2, '0');
+
+      clockEl.innerHTML = `${h}<span class="colon">:</span>${m}`;
+    }
+
+    // Update every second, synced to the start of each second
+    function startClock() {
+      updateClock();
+      const now = new Date();
+      const msUntilNextSecond = 1000 - now.getMilliseconds();
+      setTimeout(() => {
+        updateClock();
+        setInterval(updateClock, 1000);
+      }, msUntilNextSecond);
+    }
+
+    // ── Wake Lock (keep screen on) ────────────────────
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+          wakeIndicator.classList.add('active');
+
+          wakeLock.addEventListener('release', () => {
+            wakeIndicator.classList.remove('active');
+          });
+        }
+      } catch (err) {
+        console.log('Wake Lock not available:', err.message);
+      }
+    }
+
+    // Re-acquire wake lock when page becomes visible again
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        requestWakeLock();
+      }
+    });
+
+    // Also re-acquire on focus (belt and suspenders)
+    window.addEventListener('focus', requestWakeLock);
+
+    // ── Fullscreen on tap (fallback if not launched as PWA) ──
+    document.body.addEventListener('click', () => {
+      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+    });
+
+    // ── Service Worker ────────────────────────────────
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+
+    // ── Init ──────────────────────────────────────────
+    startClock();
+    requestWakeLock();
+  </script>
+</body>
+</html>
