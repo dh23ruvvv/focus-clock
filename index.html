@@ -45,10 +45,23 @@
       opacity: 0.15;
     }
 
+    /* ── Motivational quote ── */
+    #quote {
+      color: rgba(255, 255, 255, 0.18);
+      font-size: clamp(0.65rem, 1.8vw, 0.85rem);
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      text-transform: lowercase;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeIn 2.5s ease 0.8s forwards;
+    }
+
     /* ── Clock ── */
     #clock {
       color: #ffffff;
-      font-size: clamp(4.5rem, 20vw, 16rem);
+      font-size: clamp(5.5rem, 28vw, 18rem);
       font-weight: 200;
       letter-spacing: 0.02em;
       text-align: center;
@@ -78,7 +91,7 @@
 
     .info-item {
       color: rgba(255, 255, 255, 0.25);
-      font-size: clamp(0.7rem, 2.5vw, 1rem);
+      font-size: clamp(0.75rem, 2.8vw, 1.1rem);
       font-weight: 300;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -87,7 +100,7 @@
 
     .info-value {
       color: rgba(255, 255, 255, 0.45);
-      font-size: clamp(0.85rem, 3vw, 1.2rem);
+      font-size: clamp(0.95rem, 3.5vw, 1.4rem);
       font-weight: 200;
       letter-spacing: 0.04em;
       margin-top: 0.2rem;
@@ -160,8 +173,13 @@
 
     /* ── Landscape optimizations ── */
     @media (orientation: landscape) {
+      #quote {
+        margin-bottom: 0.8rem;
+        font-size: clamp(0.6rem, 1.6vh, 0.8rem);
+      }
+
       #clock {
-        font-size: clamp(5rem, 18vh, 20rem);
+        font-size: clamp(6rem, 32vh, 22rem);
       }
 
       .info-row {
@@ -169,11 +187,11 @@
       }
 
       .info-item {
-        font-size: clamp(0.6rem, 1.8vh, 0.9rem);
+        font-size: clamp(0.7rem, 2.2vh, 1rem);
       }
 
       .info-value {
-        font-size: clamp(0.75rem, 2.2vh, 1.1rem);
+        font-size: clamp(0.85rem, 2.8vh, 1.2rem);
       }
     }
 
@@ -187,6 +205,7 @@
   </style>
 </head>
 <body>
+  <div id="quote">don't let five minutes of weakness erase five months of work</div>
   <div id="clock"></div>
 
   <div class="info-row">
