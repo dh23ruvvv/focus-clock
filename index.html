@@ -11,6 +11,9 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after {
       margin: 0;
@@ -25,75 +28,204 @@
       background: #000;
       -webkit-user-select: none;
       user-select: none;
-      touch-action: none;
+      touch-action: manipulation;
     }
 
     body {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+      font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+      transition: opacity 0.5s ease;
     }
 
+    /* ── Dim mode ── */
+    body.dimmed {
+      opacity: 0.15;
+    }
+
+    /* ── Clock ── */
     #clock {
       color: #ffffff;
-      font-size: clamp(4rem, 18vw, 14rem);
+      font-size: clamp(4.5rem, 20vw, 16rem);
       font-weight: 200;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.02em;
       text-align: center;
       line-height: 1;
       opacity: 0;
-      animation: fadeIn 1s ease forwards;
+      animation: fadeIn 1.2s ease forwards;
+    }
+
+    .colon {
+      display: inline-block;
+      opacity: 0.6;
     }
 
     @keyframes fadeIn {
       to { opacity: 1; }
     }
 
-    /* Subtle pulse on the colon to show it's alive */
-    .colon {
-      display: inline-block;
-      animation: pulse 2s ease-in-out infinite;
+    /* ── Info row (study timer + countdown) ── */
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      margin-top: 1.2rem;
+      opacity: 0;
+      animation: fadeIn 1.8s ease 0.4s forwards;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
+    .info-item {
+      color: rgba(255, 255, 255, 0.25);
+      font-size: clamp(0.7rem, 2.5vw, 1rem);
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: center;
     }
 
-    /* Wake lock indicator - tiny dot in corner */
+    .info-value {
+      color: rgba(255, 255, 255, 0.45);
+      font-size: clamp(0.85rem, 3vw, 1.2rem);
+      font-weight: 200;
+      letter-spacing: 0.04em;
+      margin-top: 0.2rem;
+    }
+
+    .dot-separator {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      flex-shrink: 0;
+    }
+
+    /* ── Countdown emphasis ── */
+    .countdown-number {
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    /* ── Progress bar (time passing) ── */
+    #progress-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.12);
+      transition: width 1s linear;
+      opacity: 0;
+      animation: fadeIn 2s ease 1s forwards;
+    }
+
+    /* ── Wake lock indicator ── */
     #wake-indicator {
       position: fixed;
-      bottom: 16px;
-      right: 16px;
-      width: 6px;
-      height: 6px;
+      bottom: 12px;
+      right: 12px;
+      width: 4px;
+      height: 4px;
       border-radius: 50%;
-      background: #333;
+      background: #1a1a1a;
       transition: background 0.3s ease;
     }
 
     #wake-indicator.active {
-      background: #2a5a2a;
+      background: #1a3a1a;
+    }
+
+    /* ── Dim mode hint ── */
+    #dim-hint {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.15);
+      font-size: 0.65rem;
+      font-weight: 300;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: hintFade 4s ease 3s forwards;
+      pointer-events: none;
+    }
+
+    @keyframes hintFade {
+      0% { opacity: 0; }
+      30% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* ── Landscape optimizations ── */
+    @media (orientation: landscape) {
+      #clock {
+        font-size: clamp(5rem, 18vh, 20rem);
+      }
+
+      .info-row {
+        margin-top: 0.8rem;
+      }
+
+      .info-item {
+        font-size: clamp(0.6rem, 1.8vh, 0.9rem);
+      }
+
+      .info-value {
+        font-size: clamp(0.75rem, 2.2vh, 1.1rem);
+      }
+    }
+
+    /* ── Very small screens (SE etc.) ── */
+    @media (max-height: 500px) and (orientation: portrait) {
+      .info-row {
+        margin-top: 0.6rem;
+        gap: 1.2rem;
+      }
     }
   </style>
 </head>
 <body>
   <div id="clock"></div>
-  <div id="wake-indicator" title="Screen wake lock"></div>
+
+  <div class="info-row">
+    <div class="info-item">
+      <div>studied</div>
+      <div class="info-value" id="study-timer">0m</div>
+    </div>
+    <div class="dot-separator"></div>
+    <div class="info-item">
+      <div>remaining</div>
+      <div class="info-value" id="countdown"><span class="countdown-number">--</span> days</div>
+    </div>
+  </div>
+
+  <div id="progress-bar"></div>
+  <div id="wake-indicator"></div>
+  <div id="dim-hint">tap to dim</div>
 
   <script>
-    const clockEl = document.getElementById('clock');
-    const wakeIndicator = document.getElementById('wake-indicator');
-    let wakeLock = null;
+    // ── Config ────────────────────────────────────────
+    const GOAL_DATE = new Date('2026-07-10T00:00:00');  // Your exam/goal date
+    const START_DATE = new Date('2026-06-11T00:00:00'); // When you started preparing
 
-    // ── Time Display ──────────────────────────────────
+    // ── Elements ─────────────────────────────────────
+    const clockEl = document.getElementById('clock');
+    const studyTimerEl = document.getElementById('study-timer');
+    const countdownEl = document.getElementById('countdown');
+    const progressBar = document.getElementById('progress-bar');
+    const wakeIndicator = document.getElementById('wake-indicator');
+
+    let wakeLock = null;
+    const sessionStart = Date.now();
+
+    // ── Clock ────────────────────────────────────────
     function updateClock() {
       const now = new Date();
       let hours = now.getHours();
       const minutes = now.getMinutes();
 
-      // Convert to 12-hour format
       hours = hours % 12;
       if (hours === 0) hours = 12;
 
@@ -103,56 +235,99 @@
       clockEl.innerHTML = `${h}<span class="colon">:</span>${m}`;
     }
 
-    // Update every second, synced to the start of each second
-    function startClock() {
+    // ── Study Timer ──────────────────────────────────
+    function updateStudyTimer() {
+      const elapsed = Date.now() - sessionStart;
+      const totalMin = Math.floor(elapsed / 60000);
+      const hrs = Math.floor(totalMin / 60);
+      const mins = totalMin % 60;
+
+      if (hrs > 0) {
+        studyTimerEl.textContent = `${hrs}h ${mins}m`;
+      } else {
+        studyTimerEl.textContent = `${mins}m`;
+      }
+    }
+
+    // ── Countdown ────────────────────────────────────
+    function updateCountdown() {
+      const now = new Date();
+      const diff = GOAL_DATE - now;
+
+      if (diff <= 0) {
+        countdownEl.innerHTML = `<span class="countdown-number">0</span> days`;
+        progressBar.style.width = '100%';
+        return;
+      }
+
+      const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
+      const hoursLeft = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+      if (daysLeft <= 3) {
+        // Show hours when very close
+        const totalHours = Math.floor(diff / (1000 * 60 * 60));
+        countdownEl.innerHTML = `<span class="countdown-number">${totalHours}</span> hrs`;
+      } else {
+        countdownEl.innerHTML = `<span class="countdown-number">${daysLeft}</span> days`;
+      }
+
+      // Progress bar: how much total prep time has passed
+      const totalPrep = GOAL_DATE - START_DATE;
+      const elapsed = now - START_DATE;
+      const pct = Math.min(100, Math.max(0, (elapsed / totalPrep) * 100));
+      progressBar.style.width = `${pct}%`;
+    }
+
+    // ── Master update ────────────────────────────────
+    function updateAll() {
       updateClock();
+      updateStudyTimer();
+      updateCountdown();
+    }
+
+    function startClock() {
+      updateAll();
       const now = new Date();
       const msUntilNextSecond = 1000 - now.getMilliseconds();
       setTimeout(() => {
-        updateClock();
-        setInterval(updateClock, 1000);
+        updateAll();
+        setInterval(updateAll, 1000);
       }, msUntilNextSecond);
     }
 
-    // ── Wake Lock (keep screen on) ────────────────────
+    // ── Tap to dim ───────────────────────────────────
+    let isDimmed = false;
+    document.body.addEventListener('click', () => {
+      isDimmed = !isDimmed;
+      document.body.classList.toggle('dimmed', isDimmed);
+    });
+
+    // ── Wake Lock ────────────────────────────────────
     async function requestWakeLock() {
       try {
         if ('wakeLock' in navigator) {
           wakeLock = await navigator.wakeLock.request('screen');
           wakeIndicator.classList.add('active');
-
           wakeLock.addEventListener('release', () => {
             wakeIndicator.classList.remove('active');
           });
         }
       } catch (err) {
-        console.log('Wake Lock not available:', err.message);
+        console.log('Wake Lock:', err.message);
       }
     }
 
-    // Re-acquire wake lock when page becomes visible again
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        requestWakeLock();
-      }
+      if (document.visibilityState === 'visible') requestWakeLock();
     });
-
-    // Also re-acquire on focus (belt and suspenders)
     window.addEventListener('focus', requestWakeLock);
 
-    // ── Fullscreen on tap (fallback if not launched as PWA) ──
-    document.body.addEventListener('click', () => {
-      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      }
-    });
-
-    // ── Service Worker ────────────────────────────────
+    // ── Service Worker ───────────────────────────────
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
 
-    // ── Init ──────────────────────────────────────────
+    // ── Init ─────────────────────────────────────────
     startClock();
     requestWakeLock();
   </script>
