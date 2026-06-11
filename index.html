@@ -28,21 +28,129 @@
       background: #000;
       -webkit-user-select: none;
       user-select: none;
-      touch-action: manipulation;
     }
 
     body {
+      font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* ══════════════════════════════════════════════════
+       START SCREEN
+       ══════════════════════════════════════════════════ */
+    #start-screen {
+      position: fixed;
+      inset: 0;
+      background: #000;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-      transition: opacity 0.5s ease;
+      z-index: 100;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                  opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      touch-action: none;
     }
 
-    /* ── Dim mode ── */
-    body.dimmed {
-      opacity: 0.15;
+    #start-screen.hidden {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .start-daily-label {
+      color: rgba(255, 255, 255, 0.35);
+      font-size: clamp(0.65rem, 2vw, 0.85rem);
+      font-weight: 300;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.6rem;
+    }
+
+    .start-daily-time {
+      color: rgba(255, 255, 255, 0.55);
+      font-size: clamp(1.8rem, 8vw, 3.5rem);
+      font-weight: 200;
+      letter-spacing: 0.02em;
+      margin-bottom: 1.2rem;
+    }
+
+    /* Target progress bar */
+    .target-bar-container {
+      width: min(80%, 320px);
+      margin-bottom: 2.5rem;
+    }
+
+    .target-bar-track {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .target-bar-fill {
+      height: 100%;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+      transition: width 0.8s ease;
+      width: 0%;
+    }
+
+    .target-bar-fill.complete {
+      background: rgba(120, 200, 120, 0.5);
+    }
+
+    .target-bar-label {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.4rem;
+      color: rgba(255, 255, 255, 0.2);
+      font-size: clamp(0.55rem, 1.6vw, 0.7rem);
+      font-weight: 300;
+      letter-spacing: 0.06em;
+    }
+
+    /* Slide up hint */
+    .slide-hint {
+      color: rgba(255, 255, 255, 0.2);
+      font-size: clamp(0.6rem, 1.8vw, 0.75rem);
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      text-transform: lowercase;
+      margin-top: 1rem;
+      animation: slideHintPulse 2.5s ease-in-out infinite;
+    }
+
+    .slide-arrow {
+      display: block;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      color: rgba(255, 255, 255, 0.15);
+      font-size: 1.2rem;
+      animation: slideHintPulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes slideHintPulse {
+      0%, 100% { opacity: 1; transform: translateY(0); }
+      50% { opacity: 0.4; transform: translateY(-4px); }
+    }
+
+    /* ══════════════════════════════════════════════════
+       CLOCK SCREEN
+       ══════════════════════════════════════════════════ */
+    #clock-screen {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.6s ease 0.3s;
+    }
+
+    #clock-screen.visible {
+      opacity: 1;
     }
 
     /* ── Motivational quote ── */
@@ -54,8 +162,7 @@
       text-transform: lowercase;
       text-align: center;
       margin-bottom: 1.5rem;
-      opacity: 0;
-      animation: fadeIn 2.5s ease 0.8s forwards;
+      padding: 0 1rem;
     }
 
     /* ── Clock ── */
@@ -66,8 +173,6 @@
       letter-spacing: 0.02em;
       text-align: center;
       line-height: 1;
-      opacity: 0;
-      animation: fadeIn 1.2s ease forwards;
     }
 
     .colon {
@@ -75,18 +180,12 @@
       opacity: 0.6;
     }
 
-    @keyframes fadeIn {
-      to { opacity: 1; }
-    }
-
-    /* ── Info row (study timer + countdown) ── */
+    /* ── Info row ── */
     .info-row {
       display: flex;
       align-items: center;
       gap: 2rem;
       margin-top: 1.2rem;
-      opacity: 0;
-      animation: fadeIn 1.8s ease 0.4s forwards;
     }
 
     .info-item {
@@ -114,13 +213,12 @@
       flex-shrink: 0;
     }
 
-    /* ── Countdown emphasis ── */
     .countdown-number {
       font-weight: 400;
       color: rgba(255, 255, 255, 0.55);
     }
 
-    /* ── Progress bar (time passing) ── */
+    /* ── Progress bar ── */
     #progress-bar {
       position: fixed;
       bottom: 0;
@@ -128,8 +226,6 @@
       height: 2px;
       background: rgba(255, 255, 255, 0.12);
       transition: width 1s linear;
-      opacity: 0;
-      animation: fadeIn 2s ease 1s forwards;
     }
 
     /* ── Wake lock indicator ── */
@@ -148,30 +244,24 @@
       background: #1a3a1a;
     }
 
-    /* ── Dim mode hint ── */
-    #dim-hint {
+    /* ── Dim mode ── */
+    body.dimmed #clock-screen {
+      opacity: 0.15 !important;
+    }
+
+    /* ══════════════════════════════════════════════════
+       CONFETTI
+       ══════════════════════════════════════════════════ */
+    #confetti-canvas {
       position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: rgba(255, 255, 255, 0.15);
-      font-size: 0.65rem;
-      font-weight: 300;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      opacity: 0;
-      animation: hintFade 4s ease 3s forwards;
+      inset: 0;
+      z-index: 200;
       pointer-events: none;
     }
 
-    @keyframes hintFade {
-      0% { opacity: 0; }
-      30% { opacity: 1; }
-      80% { opacity: 1; }
-      100% { opacity: 0; }
-    }
-
-    /* ── Landscape optimizations ── */
+    /* ══════════════════════════════════════════════════
+       LANDSCAPE
+       ══════════════════════════════════════════════════ */
     @media (orientation: landscape) {
       #quote {
         margin-bottom: 0.8rem;
@@ -193,9 +283,17 @@
       .info-value {
         font-size: clamp(0.85rem, 2.8vh, 1.2rem);
       }
+
+      .start-daily-time {
+        font-size: clamp(1.5rem, 8vh, 3rem);
+      }
+
+      .target-bar-container {
+        width: min(50%, 300px);
+      }
     }
 
-    /* ── Very small screens (SE etc.) ── */
+    /* ── Small portrait screens ── */
     @media (max-height: 500px) and (orientation: portrait) {
       .info-row {
         margin-top: 0.6rem;
@@ -205,70 +303,206 @@
   </style>
 </head>
 <body>
-  <div id="quote">don't let five minutes of weakness erase five months of work</div>
-  <div id="clock"></div>
 
-  <div class="info-row">
-    <div class="info-item">
-      <div>studied</div>
-      <div class="info-value" id="study-timer">0m</div>
+  <!-- ═══ START SCREEN ═══ -->
+  <div id="start-screen">
+    <div class="start-daily-label">today's study time</div>
+    <div class="start-daily-time" id="daily-total">0h 0m</div>
+
+    <div class="target-bar-container">
+      <div class="target-bar-track">
+        <div class="target-bar-fill" id="target-fill"></div>
+      </div>
+      <div class="target-bar-label">
+        <span id="target-current">0h 0m</span>
+        <span>10h target</span>
+      </div>
     </div>
-    <div class="dot-separator"></div>
-    <div class="info-item">
-      <div>remaining</div>
-      <div class="info-value" id="countdown"><span class="countdown-number">--</span> days</div>
+
+    <span class="slide-arrow">▲</span>
+    <div class="slide-hint">slide up to start study session</div>
+  </div>
+
+  <!-- ═══ CLOCK SCREEN ═══ -->
+  <div id="clock-screen">
+    <div id="quote">don't let five minutes of weakness erase five months of work</div>
+    <div id="clock"></div>
+
+    <div class="info-row">
+      <div class="info-item">
+        <div>studied</div>
+        <div class="info-value" id="study-timer">0m</div>
+      </div>
+      <div class="dot-separator"></div>
+      <div class="info-item">
+        <div>remaining</div>
+        <div class="info-value" id="countdown"><span class="countdown-number">--</span> days</div>
+      </div>
     </div>
   </div>
 
   <div id="progress-bar"></div>
   <div id="wake-indicator"></div>
-  <div id="dim-hint">tap to dim</div>
+  <canvas id="confetti-canvas"></canvas>
 
   <script>
-    // ── Config ────────────────────────────────────────
-    const GOAL_DATE = new Date('2026-07-10T00:00:00');  // Your exam/goal date
-    const START_DATE = new Date('2026-06-11T00:00:00'); // When you started preparing
+    // ══════════════════════════════════════════════════
+    // CONFIG
+    // ══════════════════════════════════════════════════
+    const GOAL_DATE = new Date('2026-07-10T00:00:00');
+    const START_DATE = new Date('2026-06-11T00:00:00');
+    const TARGET_HOURS = 10;
+    const TARGET_MS = TARGET_HOURS * 60 * 60 * 1000;
+    const AUTOSAVE_INTERVAL = 5000; // Save every 5 seconds
+    const STORAGE_KEY = 'focusClock';
 
-    // ── Elements ─────────────────────────────────────
+    // ══════════════════════════════════════════════════
+    // ELEMENTS
+    // ══════════════════════════════════════════════════
+    const startScreen = document.getElementById('start-screen');
+    const clockScreen = document.getElementById('clock-screen');
     const clockEl = document.getElementById('clock');
     const studyTimerEl = document.getElementById('study-timer');
     const countdownEl = document.getElementById('countdown');
     const progressBar = document.getElementById('progress-bar');
     const wakeIndicator = document.getElementById('wake-indicator');
+    const dailyTotalEl = document.getElementById('daily-total');
+    const targetFill = document.getElementById('target-fill');
+    const targetCurrentEl = document.getElementById('target-current');
+    const confettiCanvas = document.getElementById('confetti-canvas');
 
+    // ══════════════════════════════════════════════════
+    // STATE
+    // ══════════════════════════════════════════════════
     let wakeLock = null;
-    const sessionStart = Date.now();
+    let sessionActive = false;       // Is user on clock screen?
+    let timerRunning = false;        // Is timer actively counting?
+    let sessionActiveMs = 0;         // Active ms in current session
+    let lastTickTime = null;         // Last time we recorded a tick
+    let autosaveTimer = null;
+    let clockInterval = null;
+    let isDimmed = false;
+    let confettiShown = false;
 
-    // ── Clock ────────────────────────────────────────
-    function updateClock() {
+    // ══════════════════════════════════════════════════
+    // LOCAL STORAGE — SESSION PERSISTENCE
+    // ══════════════════════════════════════════════════
+    function getTodayKey() {
       const now = new Date();
-      let hours = now.getHours();
-      const minutes = now.getMinutes();
-
-      hours = hours % 12;
-      if (hours === 0) hours = 12;
-
-      const h = String(hours);
-      const m = String(minutes).padStart(2, '0');
-
-      clockEl.innerHTML = `${h}<span class="colon">:</span>${m}`;
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     }
 
-    // ── Study Timer ──────────────────────────────────
-    function updateStudyTimer() {
-      const elapsed = Date.now() - sessionStart;
-      const totalMin = Math.floor(elapsed / 60000);
-      const hrs = Math.floor(totalMin / 60);
-      const mins = totalMin % 60;
-
-      if (hrs > 0) {
-        studyTimerEl.textContent = `${hrs}h ${mins}m`;
-      } else {
-        studyTimerEl.textContent = `${mins}m`;
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return { sessions: {}, confettiShownDate: '' };
+        return JSON.parse(raw);
+      } catch {
+        return { sessions: {}, confettiShownDate: '' };
       }
     }
 
-    // ── Countdown ────────────────────────────────────
+    function saveData(data) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch { /* storage full — unlikely for this tiny data */ }
+    }
+
+    function getTodaySessions() {
+      const data = loadData();
+      const key = getTodayKey();
+      return data.sessions[key] || [];
+    }
+
+    function getTodayTotalMs() {
+      const sessions = getTodaySessions();
+      return sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+    }
+
+    function saveCurrentSession() {
+      const currentMs = getCurrentSessionMs();
+      if (currentMs <= 0) return;
+
+      const data = loadData();
+      const key = getTodayKey();
+
+      if (!data.sessions[key]) data.sessions[key] = [];
+
+      // Find or create current session entry (last one if it has our sessionId)
+      const sid = window._sessionId;
+      const existing = data.sessions[key].find(s => s.id === sid);
+
+      if (existing) {
+        existing.duration = currentMs;
+      } else {
+        data.sessions[key].push({
+          id: sid,
+          startTime: new Date().toISOString(),
+          duration: currentMs
+        });
+      }
+
+      // Clean up old days (keep last 7 days only)
+      const keys = Object.keys(data.sessions).sort();
+      while (keys.length > 7) {
+        delete data.sessions[keys.shift()];
+      }
+
+      saveData(data);
+    }
+
+    // Generate unique session ID
+    window._sessionId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+    // ══════════════════════════════════════════════════
+    // STUDY TIMER — PAUSE/RESUME LOGIC
+    // ══════════════════════════════════════════════════
+    function startTimer() {
+      timerRunning = true;
+      lastTickTime = Date.now();
+    }
+
+    function pauseTimer() {
+      if (timerRunning && lastTickTime) {
+        // Add elapsed time since last tick
+        sessionActiveMs += Date.now() - lastTickTime;
+        lastTickTime = null;
+      }
+      timerRunning = false;
+      saveCurrentSession(); // Save immediately on pause
+    }
+
+    function getCurrentSessionMs() {
+      let total = sessionActiveMs;
+      if (timerRunning && lastTickTime) {
+        total += Date.now() - lastTickTime;
+      }
+      return total;
+    }
+
+    // ══════════════════════════════════════════════════
+    // DISPLAY HELPERS
+    // ══════════════════════════════════════════════════
+    function formatDuration(ms) {
+      const totalMin = Math.floor(ms / 60000);
+      const hrs = Math.floor(totalMin / 60);
+      const mins = totalMin % 60;
+      if (hrs > 0) return `${hrs}h ${mins}m`;
+      return `${mins}m`;
+    }
+
+    function updateClock() {
+      const now = new Date();
+      let hours = now.getHours() % 12;
+      if (hours === 0) hours = 12;
+      const m = String(now.getMinutes()).padStart(2, '0');
+      clockEl.innerHTML = `${hours}<span class="colon">:</span>${m}`;
+    }
+
+    function updateStudyTimer() {
+      studyTimerEl.textContent = formatDuration(getCurrentSessionMs());
+    }
+
     function updateCountdown() {
       const now = new Date();
       const diff = GOAL_DATE - now;
@@ -280,48 +514,238 @@
       }
 
       const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
-      const hoursLeft = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
       if (daysLeft <= 3) {
-        // Show hours when very close
         const totalHours = Math.floor(diff / (1000 * 60 * 60));
         countdownEl.innerHTML = `<span class="countdown-number">${totalHours}</span> hrs`;
       } else {
         countdownEl.innerHTML = `<span class="countdown-number">${daysLeft}</span> days`;
       }
 
-      // Progress bar: how much total prep time has passed
       const totalPrep = GOAL_DATE - START_DATE;
       const elapsed = now - START_DATE;
       const pct = Math.min(100, Math.max(0, (elapsed / totalPrep) * 100));
       progressBar.style.width = `${pct}%`;
     }
 
-    // ── Master update ────────────────────────────────
+    function updateStartScreen() {
+      const todayMs = getTodayTotalMs() + (sessionActive ? getCurrentSessionMs() : 0);
+      const pct = Math.min(100, (todayMs / TARGET_MS) * 100);
+
+      dailyTotalEl.textContent = formatDuration(todayMs);
+      targetCurrentEl.textContent = formatDuration(todayMs);
+      targetFill.style.width = `${pct}%`;
+
+      if (pct >= 100) {
+        targetFill.classList.add('complete');
+      } else {
+        targetFill.classList.remove('complete');
+      }
+    }
+
     function updateAll() {
       updateClock();
       updateStudyTimer();
       updateCountdown();
     }
 
-    function startClock() {
+    // ══════════════════════════════════════════════════
+    // CONFETTI 🎉
+    // ══════════════════════════════════════════════════
+    function checkAndFireConfetti() {
+      const data = loadData();
+      const today = getTodayKey();
+
+      // Already shown today
+      if (data.confettiShownDate === today) return;
+
+      const todayMs = getTodayTotalMs() + getCurrentSessionMs();
+      if (todayMs >= TARGET_MS) {
+        data.confettiShownDate = today;
+        saveData(data);
+        fireConfetti();
+      }
+    }
+
+    function fireConfetti() {
+      const ctx = confettiCanvas.getContext('2d');
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = [
+        'rgba(255,255,255,0.8)',
+        'rgba(200,200,200,0.6)',
+        'rgba(150,200,150,0.7)',
+        'rgba(180,180,220,0.6)',
+        'rgba(220,200,160,0.7)'
+      ];
+
+      // Create particles — subtle, library-safe amount
+      for (let i = 0; i < 60; i++) {
+        particles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: -10 - Math.random() * confettiCanvas.height * 0.5,
+          w: 3 + Math.random() * 4,
+          h: 2 + Math.random() * 3,
+          vx: (Math.random() - 0.5) * 2,
+          vy: 1.5 + Math.random() * 2.5,
+          rotation: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 8,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          life: 1
+        });
+      }
+
+      let frame = 0;
+      const maxFrames = 180; // ~3 seconds at 60fps
+
+      function animate() {
+        frame++;
+        if (frame > maxFrames) {
+          ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+          return;
+        }
+
+        ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+        for (const p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.04; // gravity
+          p.rotation += p.rotSpeed;
+
+          // Fade out in last 60 frames
+          if (frame > maxFrames - 60) {
+            p.life = Math.max(0, (maxFrames - frame) / 60);
+          }
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.globalAlpha = p.life;
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    // ══════════════════════════════════════════════════
+    // SLIDE UP GESTURE
+    // ══════════════════════════════════════════════════
+    let touchStartY = 0;
+    let touchStartTime = 0;
+
+    startScreen.addEventListener('touchstart', (e) => {
+      touchStartY = e.touches[0].clientY;
+      touchStartTime = Date.now();
+    }, { passive: true });
+
+    startScreen.addEventListener('touchend', (e) => {
+      const touchEndY = e.changedTouches[0].clientY;
+      const deltaY = touchStartY - touchEndY;
+      const deltaTime = Date.now() - touchStartTime;
+
+      // Swipe up: at least 50px upward or fast flick (30px in <300ms)
+      if (deltaY > 50 || (deltaY > 30 && deltaTime < 300)) {
+        startStudySession();
+      }
+    }, { passive: true });
+
+    // Also allow click/tap for non-touch devices
+    startScreen.addEventListener('click', (e) => {
+      // Only trigger on click if no touch event (desktop fallback)
+      if (touchStartTime === 0 || Date.now() - touchStartTime > 1000) {
+        startStudySession();
+      }
+    });
+
+    function startStudySession() {
+      if (sessionActive) return;
+      sessionActive = true;
+
+      // Hide start screen, show clock
+      startScreen.classList.add('hidden');
+      clockScreen.classList.add('visible');
+
+      // Start timer
+      startTimer();
+
+      // Start clock updates
       updateAll();
       const now = new Date();
       const msUntilNextSecond = 1000 - now.getMilliseconds();
       setTimeout(() => {
         updateAll();
-        setInterval(updateAll, 1000);
+        clockInterval = setInterval(updateAll, 1000);
       }, msUntilNextSecond);
+
+      // Start autosave
+      autosaveTimer = setInterval(() => {
+        saveCurrentSession();
+        updateStartScreen(); // Keep 10h bar updated
+        checkAndFireConfetti();
+      }, AUTOSAVE_INTERVAL);
+
+      // Request wake lock
+      requestWakeLock();
     }
 
-    // ── Tap to dim ───────────────────────────────────
-    let isDimmed = false;
-    document.body.addEventListener('click', () => {
+    // ══════════════════════════════════════════════════
+    // VISIBILITY — PAUSE/RESUME
+    // ══════════════════════════════════════════════════
+    document.addEventListener('visibilitychange', () => {
+      if (!sessionActive) return;
+
+      if (document.visibilityState === 'hidden') {
+        // App going to background — pause & save
+        pauseTimer();
+      } else if (document.visibilityState === 'visible') {
+        // App coming back — resume
+        startTimer();
+        requestWakeLock();
+        updateAll();
+      }
+    });
+
+    // Additional save hooks for when app is killed
+    window.addEventListener('pagehide', () => {
+      if (sessionActive) pauseTimer();
+    });
+
+    window.addEventListener('beforeunload', () => {
+      if (sessionActive) pauseTimer();
+    });
+
+    // Freeze/resume for mobile browsers
+    if ('onfreeze' in document) {
+      document.addEventListener('freeze', () => {
+        if (sessionActive) pauseTimer();
+      });
+      document.addEventListener('resume', () => {
+        if (sessionActive) {
+          startTimer();
+          updateAll();
+        }
+      });
+    }
+
+    // ══════════════════════════════════════════════════
+    // TAP TO DIM (only on clock screen)
+    // ══════════════════════════════════════════════════
+    clockScreen.addEventListener('click', () => {
       isDimmed = !isDimmed;
       document.body.classList.toggle('dimmed', isDimmed);
     });
 
-    // ── Wake Lock ────────────────────────────────────
+    // ══════════════════════════════════════════════════
+    // WAKE LOCK
+    // ══════════════════════════════════════════════════
     async function requestWakeLock() {
       try {
         if ('wakeLock' in navigator) {
@@ -336,19 +760,17 @@
       }
     }
 
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') requestWakeLock();
-    });
-    window.addEventListener('focus', requestWakeLock);
-
-    // ── Service Worker ───────────────────────────────
+    // ══════════════════════════════════════════════════
+    // SERVICE WORKER
+    // ══════════════════════════════════════════════════
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
 
-    // ── Init ─────────────────────────────────────────
-    startClock();
-    requestWakeLock();
+    // ══════════════════════════════════════════════════
+    // INIT — SHOW START SCREEN WITH TODAY'S DATA
+    // ══════════════════════════════════════════════════
+    updateStartScreen();
   </script>
 </body>
 </html>
