@@ -383,13 +383,31 @@
     let clockInterval = null;
     let isDimmed = false;
     let confettiShown = false;
+    let currentDayKey = getTodayKey();
 
     // ══════════════════════════════════════════════════
     // LOCAL STORAGE — SESSION PERSISTENCE
     // ══════════════════════════════════════════════════
     function getTodayKey() {
       const now = new Date();
-      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const adjusted = new Date(now.getTime() - 6 * 60 * 60 * 1000); // Shift day boundary to 6:00 AM
+      return `${adjusted.getFullYear()}-${String(adjusted.getMonth() + 1).padStart(2, '0')}-${String(adjusted.getDate()).padStart(2, '0')}`;
+    }
+
+    function checkDayTransition() {
+      const todayKey = getTodayKey();
+      if (todayKey !== currentDayKey) {
+        if (sessionActive) {
+          saveCurrentSession(currentDayKey);
+          window._sessionId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+          sessionActiveMs = 0;
+          if (timerRunning) {
+            lastTickTime = Date.now();
+          }
+        }
+        currentDayKey = todayKey;
+        updateStartScreen();
+      }
     }
 
     function loadData() {
@@ -419,12 +437,12 @@
       return sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
     }
 
-    function saveCurrentSession() {
+    function saveCurrentSession(dayKey) {
       const currentMs = getCurrentSessionMs();
       if (currentMs <= 0) return;
 
       const data = loadData();
-      const key = getTodayKey();
+      const key = dayKey || getTodayKey();
 
       if (!data.sessions[key]) data.sessions[key] = [];
 
@@ -544,6 +562,7 @@
     }
 
     function updateAll() {
+      checkDayTransition();
       updateClock();
       updateStudyTimer();
       updateCountdown();
@@ -700,6 +719,8 @@
     // VISIBILITY — PAUSE/RESUME
     // ══════════════════════════════════════════════════
     document.addEventListener('visibilitychange', () => {
+      checkDayTransition();
+
       if (!sessionActive) return;
 
       if (document.visibilityState === 'hidden') {
@@ -728,6 +749,7 @@
         if (sessionActive) pauseTimer();
       });
       document.addEventListener('resume', () => {
+        checkDayTransition();
         if (sessionActive) {
           startTimer();
           updateAll();
@@ -771,6 +793,9 @@
     // INIT — SHOW START SCREEN WITH TODAY'S DATA
     // ══════════════════════════════════════════════════
     updateStartScreen();
+
+    // Start periodic check for day transition (especially useful when on start screen)
+    setInterval(checkDayTransition, 10000);
   </script>
 </body>
 </html>

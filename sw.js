@@ -1,5 +1,5 @@
 // Service Worker for Focus Clock PWA
-const CACHE_NAME = 'focus-clock-v4';
+const CACHE_NAME = 'focus-clock-v5';
 
 // Install: cache core page
 self.addEventListener('install', (event) => {
